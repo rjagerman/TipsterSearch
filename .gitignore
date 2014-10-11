@@ -1,3 +1,7 @@
+# dataset
+tipster/
+
+# common files
 *.class
 *.log
 

@@ -1,4 +1,4 @@
-package ch.ethz.dal.tipstersearch.io
+package ch.ethz.inf.da.tipstersearch.io
 
 import java.util.zip.ZipFile
 import java.util.zip.ZipEntry

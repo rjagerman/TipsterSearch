@@ -1,8 +1,8 @@
 package ch.ethz.inf.da.tipstersearch
 
 import scala.io.Source
-import ch.ethz.dal.tipstersearch.io.QueryReader
-import ch.ethz.dal.tipstersearch.io.DocumentStream
+import ch.ethz.inf.da.tipstersearch.io.QueryReader
+import ch.ethz.inf.da.tipstersearch.io.DocumentStream
 
 object Main {
     def main(args:Array[String]) {

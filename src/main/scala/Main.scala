@@ -8,12 +8,17 @@ object Main {
 	def main(args:Array[String]) {
 
         val qr = new QueryReader()
-        val queries = qr.read("tipster/topics")
+        val queries = qr.read("dataset/topics")
 
         val ds = new DocumentStream()
-        ds.read("tipster/zips-1.zip").foreach{ e => println(e.getName()) }
+        var count = 0
+        for(doc:String <- ds.readDirectory("dataset/tipster")) {
+            count += 1
+            if(count % 1000 == 0) {
+                println(count)
+            }
+        }
 
-        //queries.foreach{ println }
 	}
 }
 

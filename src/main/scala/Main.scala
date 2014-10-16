@@ -5,7 +5,7 @@ import ch.ethz.dal.tipstersearch.io.QueryReader
 import ch.ethz.dal.tipstersearch.io.DocumentStream
 
 object Main {
-	def main(args:Array[String]) {
+    def main(args:Array[String]) {
 
         val qr = new QueryReader()
         val queries = qr.read("dataset/topics")
@@ -19,6 +19,6 @@ object Main {
             }
         }
 
-	}
+    }
 }
 

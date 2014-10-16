@@ -32,7 +32,7 @@ class DocumentStream {
     }
 
     def expand(zis:ZipInputStream) : Iterator[String] = {
-        iterateZip(zis).flatMap{ case (zem,zism) => if(zem.getName().endsWith(".zip")) expand(new ZipInputStream(zism)) else List(Source.fromInputStream(zis).mkString) }
+        iterateZip(zis).flatMap{ case (zem,zism) => if(zem.getName().endsWith(".zip")) expand(new ZipInputStream(zism)) else List(Source.fromInputStream(zism).mkString) }
     }
 
     def iterateZip(zis:ZipInputStream) : Iterator[(ZipEntry, ZipInputStream)] = {

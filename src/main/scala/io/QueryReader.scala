@@ -1,4 +1,4 @@
-package ch.ethz.inf.da.tipstersearch.io
+package ch.ethz.dal.tipstersearch.io
 
 import scala.io.Source
 
@@ -10,7 +10,7 @@ class QueryReader {
 
 	    val topics = Source.fromFile(filename).getLines.
             filter(_.startsWith("<title>")).
-            map(line => line.replaceAll("<title>[ ]*Topic:[ ]*", ""))
+            map(line => line.replaceAll("<title>\\s*Topic:\\s*(.*)\\s*$", "$1"))
 
         return nums.zip(topics).toList
 	}

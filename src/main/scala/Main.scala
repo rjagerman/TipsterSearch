@@ -5,6 +5,7 @@ import ch.ethz.inf.da.tipstersearch.io.QueryReader
 import ch.ethz.inf.da.tipstersearch.io.DocumentStream
 import ch.ethz.inf.da.tipstersearch.parsing.DocumentParser
 import ch.ethz.inf.da.tipstersearch.parsing.TextParser
+import ch.ethz.inf.da.tipstersearch.relevancemodels.TermFrequencyModel
 
 case class Config(
     n: Int = 100,
@@ -45,6 +46,9 @@ object Main {
         val ds = new DocumentStream()
         var count = 0
 
+        val tfm = new TermFrequencyModel()
+        def score(a:List[String],b:List[String]) : Double = tfm.score(a,b)
+
         // Iterate over the documents, ranking each one
         for(doc:String <- ds.readDirectory(config.tipsterDirectory)) {
 
@@ -63,18 +67,5 @@ object Main {
 
     }
 
-    def log2(x: Double) = scala.math.log(x)/scala.math.log(2)
-
-    def scoreTermModel(queryTokens:List[String], docTokens:List[String]) : Double = {
-        queryTokens.flatMap(q => logtf(tf(docTokens)).get(q)).sum
-    }
-
-    def tf(tokens:List[String]) : Map[String, Int] = {
-        tokens.groupBy(identity).mapValues(l => l.length)
-    }
-
-    def logtf(tf : Map[String, Int]) = {
-        tf.mapValues(v => log2(v.toDouble/tf.values.sum+1.0))
-    }
 }
 

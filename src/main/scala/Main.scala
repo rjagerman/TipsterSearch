@@ -4,7 +4,7 @@ import scala.io.Source
 import ch.ethz.inf.da.tipstersearch.io.QueryReader
 import ch.ethz.inf.da.tipstersearch.io.DocumentStream
 import ch.ethz.inf.da.tipstersearch.parsing.DocumentParser
-import ch.ethz.inf.da.tipstersearch.parsing.TextParser
+import ch.ethz.inf.da.tipstersearch.parsing.Tokenizer
 import ch.ethz.inf.da.tipstersearch.relevancemodels.TermFrequencyModel
 
 case class Config(
@@ -34,36 +34,72 @@ object Main {
 
     def runSearch(config:Config) {
 
-        // Create parsers
-        val dp = new DocumentParser()
-        val tp = new TextParser()
-
         // Read and preprocess queries
         val qr = new QueryReader()
-        val queries = qr.read(config.topicsFile).map{ case (id,str) => (id, tp.parse(str).flatMap(x => x.toLowerCase.split("-"))) }
+        val queries = qr.read(config.topicsFile).map{ case (id,str) => (id, Tokenizer.tokenize(str).flatMap(x => x.toLowerCase.split("-"))) }
 
         // Open document stream
         val ds = new DocumentStream()
+        val dp = new DocumentParser()
         var count = 0
 
-        val tfm = new TermFrequencyModel()
-        def score(a:List[String],b:List[String]) : Double = tfm.score(a,b)
+        val bufferedStream = ds.readDirectory(config.tipsterDirectory)
+                                .filter(x => !x.isEmpty())
+                                .grouped(1000)
 
-        // Iterate over the documents, ranking each one
-        for(doc:String <- ds.readDirectory(config.tipsterDirectory)) {
+        val scoreStream = bufferedStream.flatMap(x => x.par
+                            .map(dp.parse)
+                            .map{case (id,str) => (id, Tokenizer.tokenize(str))}
+                            .map{case (id,ls) => (id, queries.map{case (qid,qtokens) => (qid, TermFrequencyModel.score(qtokens, ls))})}
+                            .toList
+                          )
 
-            val (docId, contents) = dp.parse(doc) 
-            val docTokens = tp.parse(contents)
-
-            for((queryId,queryTokens) <- queries) {
-                val s = score(queryTokens, docTokens)
-            }
-
+        for( (id:String, scores:List[(Int,Double)]) <- scoreStream ) {
             count += 1
             if(count % 1000 == 0) {
                 println("Processed " + count + " documents!")
             }
         }
+
+
+        // Iterate over the documents, ranking each one
+        /*for( chunk <- ds.readDirectory(config.tipsterDirectory).filter(x => !x.isEmpty()).grouped(1000)) {
+
+            for((docId, docTokens) <- chunk.par.map(dp.parse).map{case (id,str) => (id, Tokenizer.tokenize(str))}) {
+                for((queryId,queryTokens) <- queries.par) {
+                    val s = TermFrequencyModel.score(queryTokens,docTokens)
+                }
+
+                count += 1
+                if(count % 1000 == 0) {
+                    println("Processed " + count + " documents!")
+                    if(count >= 10000) {
+                        return;
+                    }
+                }
+            }
+
+        }*/
+        /*for( (docId, docTokens) <- ds.readDirectory(config.tipsterDirectory)
+                                    .filter(x => !x.isEmpty())
+                                    .par.map(dp.parse)
+                                    .map{case (id,str) => (id, Tokenizer.tokenize(str))}
+                                    .toList) {
+
+            
+        }*/
+
+
+        /*for(doc:String <- ds.readDirectory(config.tipsterDirectory).filter(x => !x.isEmpty())) {
+
+            val (docId, contents) = dp.parse(doc)
+            val docTokens = Tokenizer.tokenize(contents)
+            //.map{case (id,contents) => (id,Tokenizer.tokenize(contents))}
+
+            
+
+            
+        }*/
 
     }
 

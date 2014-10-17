@@ -1,6 +1,6 @@
 package ch.ethz.inf.da.tipstersearch.relevancemodels
 
-class TermFrequencyModel {
+object TermFrequencyModel {
     def score(queryTokens:List[String], documentTokens:List[String]) : Double = {
         val dtf = logtf(tf(documentTokens))
         queryTokens.flatMap(q => dtf.get(q)).sum

@@ -3,6 +3,7 @@ package ch.ethz.inf.da.tipstersearch.io
 import java.util.zip.ZipFile
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import java.io.BufferedInputStream
 import java.io.InputStream
 import java.io.FileInputStream
 import java.io.File
@@ -24,20 +25,25 @@ class ZipIterator(zis: ZipInputStream) extends Iterator[ZipEntry] {
 class DocumentStream {
 
     def readDirectory(path:String) : Iterator[String] = {
-        new File(path).listFiles.iterator.filter(f => f.getName.endsWith(".zip")).flatMap(f => read(f.getAbsolutePath))
+        new File(path).listFiles.iterator
+            .filter(f => f.getName.endsWith(".zip"))
+            .flatMap(f => read(f.getAbsolutePath))
     }
 
     def read(path:String) : Iterator[String] = {
-        expand(new ZipInputStream(new FileInputStream(path)))
+        expand(new ZipInputStream(new BufferedInputStream(new FileInputStream(path))))
     }
 
     def expand(zis:ZipInputStream) : Iterator[String] = {
-        iterateZip(zis).flatMap{ case (zem,zism) => if(zem.getName().endsWith(".zip")) expand(new ZipInputStream(zism)) else List(Source.fromInputStream(zism).mkString) }
-    }
-
-    def iterateZip(zis:ZipInputStream) : Iterator[(ZipEntry, ZipInputStream)] = {
-        val zi = new ZipIterator(zis)
-        for(ze:ZipEntry <- zi) yield (ze, zis)
+        new ZipIterator(zis)
+            .map(x => (x, zis))
+            .flatMap{
+                case (zem,zism) =>
+                    if(zem.getName().endsWith(".zip"))
+                        expand(new ZipInputStream(zism))
+                    else
+                        List(Source.fromInputStream(zism).mkString)
+            }
     }
 
 }

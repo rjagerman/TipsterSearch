@@ -43,10 +43,12 @@ object Main {
         val dp = new DocumentParser()
         var count = 0
 
+        // Generate a buffered stream that reads multiple documents per iteration
         val bufferedStream = ds.readDirectory(config.tipsterDirectory)
                                 .filter(x => !x.isEmpty())
                                 .grouped(1000)
 
+        // Generate a score stream that computes scores in parallel on the buffered entries
         val scoreStream = bufferedStream.flatMap(x => x.par
                             .map(dp.parse)
                             .map{case (id,str) => (id, Tokenizer.tokenize(str))}
@@ -54,52 +56,16 @@ object Main {
                             .toList
                           )
 
+        // Iterate over the scores for each document
         for( (id:String, scores:List[(Int,Double)]) <- scoreStream ) {
             count += 1
             if(count % 1000 == 0) {
                 println("Processed " + count + " documents!")
             }
-        }
-
-
-        // Iterate over the documents, ranking each one
-        /*for( chunk <- ds.readDirectory(config.tipsterDirectory).filter(x => !x.isEmpty()).grouped(1000)) {
-
-            for((docId, docTokens) <- chunk.par.map(dp.parse).map{case (id,str) => (id, Tokenizer.tokenize(str))}) {
-                for((queryId,queryTokens) <- queries.par) {
-                    val s = TermFrequencyModel.score(queryTokens,docTokens)
-                }
-
-                count += 1
-                if(count % 1000 == 0) {
-                    println("Processed " + count + " documents!")
-                    if(count >= 10000) {
-                        return;
-                    }
-                }
+            if(count >= 10000) {
+                return
             }
-
-        }*/
-        /*for( (docId, docTokens) <- ds.readDirectory(config.tipsterDirectory)
-                                    .filter(x => !x.isEmpty())
-                                    .par.map(dp.parse)
-                                    .map{case (id,str) => (id, Tokenizer.tokenize(str))}
-                                    .toList) {
-
-            
-        }*/
-
-
-        /*for(doc:String <- ds.readDirectory(config.tipsterDirectory).filter(x => !x.isEmpty())) {
-
-            val (docId, contents) = dp.parse(doc)
-            val docTokens = Tokenizer.tokenize(contents)
-            //.map{case (id,contents) => (id,Tokenizer.tokenize(contents))}
-
-            
-
-            
-        }*/
+        }
 
     }
 

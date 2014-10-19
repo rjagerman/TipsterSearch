@@ -1,12 +1,15 @@
 package ch.ethz.inf.da.tipstersearch
 
-import scala.io.Source
-import ch.ethz.inf.da.tipstersearch.io.QueryReader
-import ch.ethz.inf.da.tipstersearch.io.DocumentStream
-import ch.ethz.inf.da.tipstersearch.parsing.DocumentParser
-import ch.ethz.inf.da.tipstersearch.parsing.Tokenizer
-import ch.ethz.inf.da.tipstersearch.relevancemodels.TermFrequencyModel
+import java.io.{File, FileInputStream, InputStream}
+import scala.collection.mutable.HashMap
+import ch.ethz.inf.da.tipstersearch.io.{QueryReader, RelevanceReader, ZipIterator}
+import ch.ethz.inf.da.tipstersearch.scoring.{RelevanceModel, TfidfModel, LanguageModel}
+import ch.ethz.inf.da.tipstersearch.processing.Tokenizer
+import ch.ethz.inf.da.tipstersearch.util.Stopwatch
+import ch.ethz.inf.da.tipstersearch.metrics.PrecisionRecall
 
+/** Defines the command line options 
+  */
 case class Config(
     n: Int = 100,
     tipsterDirectory: String = "dataset/tipster",
@@ -14,6 +17,8 @@ case class Config(
     qrelsFile: String = "dataset/qrels"
 )
 
+/** Entry point of the application
+  */
 object Main {
 
     def main(args:Array[String]) {
@@ -27,46 +32,75 @@ object Main {
         }
 
         parser.parse(args, Config()) map { config => 
-            runSearch(config)
+            run(config)
         }
 
     }
 
-    def runSearch(config:Config) {
+    /** runs the application with the options specified in the config
+      *
+      * @param config the configuration to use
+      */
+    def run(config:Config) {
 
-        // Read and preprocess queries
-        val qr = new QueryReader()
-        val queries = qr.read(config.topicsFile).map{ case (id,str) => (id, Tokenizer.tokenize(str).flatMap(x => x.toLowerCase.split("-"))) }
+        // Start timer
+        Stopwatch.start
 
-        // Open document stream
-        val ds = new DocumentStream()
-        val dp = new DocumentParser()
-        var count = 0
+        // Read queries and binary relevance truth values
+        val queries:List[Query] = QueryReader.read(config.topicsFile)
+        RelevanceReader.read(config.qrelsFile, queries)
 
-        // Generate a buffered stream that reads multiple documents per iteration
-        val bufferedStream = ds.readDirectory(config.tipsterDirectory)
-                                .filter(x => !x.isEmpty())
-                                .grouped(1000)
+        // Collect statistics about the document collection
+        println("Computing document collection statistics")
+        val cs:CollectionStatistics = new CollectionStatistics()
+        cs.compute(documentIterator(config.tipsterDirectory))
 
-        // Generate a score stream that computes scores in parallel on the buffered entries
-        val scoreStream = bufferedStream.flatMap(x => x.par
-                            .map(dp.parse)
-                            .map{case (id,str) => (id, Tokenizer.tokenize(str))}
-                            .map{case (id,ls) => (id, queries.map{case (qid,qtokens) => (qid, TermFrequencyModel.score(qtokens, ls))})}
-                            .toList
-                          )
+        // Set up the relevance model to use
+        val model:RelevanceModel = new TfidfModel(cs)
 
-        // Iterate over the scores for each document
-        for( (id:String, scores:List[(Int,Double)]) <- scoreStream ) {
-            count += 1
-            if(count % 1000 == 0) {
-                println("Processed " + count + " documents!")
-            }
-            if(count >= 10000) {
-                return
+        // Search for the queries
+        println("Running search")
+        val searchEngine:SearchEngine = new SearchEngine(model)
+        searchEngine.search(queries, documentIterator(config.tipsterDirectory), config.n)
+
+        // Display metrics
+        var MAP:Double = 0.0
+        for( query <- queries ) {
+            val pr = new PrecisionRecall(query)
+            MAP += pr.precision
+            println(query.id + " ('" + query + "')")
+            println("   Precision: %.3f".format(pr.precision))
+            println("   Recall: %.3f".format(pr.recall))
+            println("   Avg Precision: %.3f".format(pr.averagePrecision))
+            
+            var count = 0
+            for(r <- query.results.ordered) {
+                count += 1
+                println(query.id + " " + count + " " + r.id)
             }
         }
+        MAP /= queries.size.toDouble
+        println("MAP: " + MAP)
 
+        // Print the time spent
+        print("Total time: ")
+        Stopwatch.printTime
+
+    }
+
+    /** Returns an iterator over the tipster documents found in given directory
+      * 
+      * @param directory the directory to search in
+      * @return an iterator over all documents
+      */
+    def documentIterator(directory:String) : Iterator[Document] = {
+        new File(directory).listFiles.iterator
+            .filter(f => f.getName.endsWith(".zip"))
+            .flatMap(f =>
+                new ZipIterator(new FileInputStream(f.getAbsolutePath)).map{
+                    case (name:String, is:InputStream) => new Document(is)
+                }
+            )
     }
 
 }

@@ -50,6 +50,9 @@ class CollectionStatistics {
             }
         }
 
+        println()
+        println("Done processing " + nrOfDocuments + " documents")
+
     }
 
     def getDocumentFrequency(str:String) : Int = documentFrequencies(index(str))

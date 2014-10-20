@@ -42,5 +42,8 @@ class SearchEngine(model:RelevanceModel) {
             
         }
 
+        println()
+        println("Done processing " + iter + " documents")
+
     }
 }

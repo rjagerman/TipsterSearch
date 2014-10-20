@@ -5,8 +5,10 @@ import javax.xml.parsers.DocumentBuilderFactory
 import org.w3c.dom.{Document => XMLDocument, NodeList}
 import ch.ethz.inf.da.tipstersearch.processing.TextProcessor
 
-/** Represents a single document in the tipster collection
+/**
+  * Represents a single document in the tipster collection
   *
+  * @constructor creates a document based on the xml content in given InputStream
   * @param is the InputStream to read from
   */
 class Document(is:InputStream) {

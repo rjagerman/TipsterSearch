@@ -2,11 +2,20 @@ package ch.ethz.inf.da.tipstersearch.scoring
 
 import scala.collection.mutable.PriorityQueue
 
+/**
+  * Maintains the top n results
+  * 
+  * @constructor creates a container that holds the top n results
+  * @param n the amount of results to retain
+  */
 class TopResults(n: Int) extends PriorityQueue[Result]()(Ordering.by(res => -res.score)) {
 
-    //private def score (res: Result) = -res.score 
-    //private val heap = new PriorityQueue[Result]()(Ordering.by(score))
-
+    /**
+      * Adds a result to the top results if it is scored high enough
+      * 
+      * @param res the result to add
+      * @return true if it was added, false if it was discarded
+      */
     def add(res: Result) : Boolean = {
         if (size < n)  {
             // Always add if the heap is not full
@@ -22,29 +31,10 @@ class TopResults(n: Int) extends PriorityQueue[Result]()(Ordering.by(res => -res
         }
     }
 
+    /**
+      * Returns the top results ordered by score
+      */
     def ordered = this.toList.sortBy(res => -res.score)  
-
-    /*// score a document and try to add to results
-    def process(title: String, doc: List[String]) : Boolean = {
-        val score = query.score(doc)
-        add(Result(title,score))
-    }
-    
-    // get top n results (or m<n, if not enough docs processed)
-    def results = heap.toList.sortBy(res => -res.score)    
-
-        // heap and operations on heap
-    
-    private def add(res: ScoredResult) : Boolean = {    
-        if (heap.size < n)  { // heap not full
-            heap += res
-            true
-        } else if (heap.head.score < res.score) {
-            heap.dequeue
-            heap += res
-            true
-        } else false
-    }*/
 
 }
 

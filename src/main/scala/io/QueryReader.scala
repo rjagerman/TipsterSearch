@@ -3,7 +3,17 @@ package ch.ethz.inf.da.tipstersearch.io
 import ch.ethz.inf.da.tipstersearch.Query
 import scala.io.Source
 
+/**
+  * Reads queries for the tipster dataset
+  */
 object QueryReader {
+
+    /**
+      * Reads the queries from given filename
+      * 
+      * @param filename the file to read from
+      * @return the list of queries
+      */
     def read(filename:String) : List[Query] = {
         val nums = Source.fromFile(filename).getLines.
             filter(_.startsWith("<num>")).
@@ -17,5 +27,6 @@ object QueryReader {
             case(num:Int, topic:String) => new Query(num, topic)
         }.toList
     }
+    
 }
 

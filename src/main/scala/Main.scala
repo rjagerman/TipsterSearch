@@ -58,14 +58,14 @@ object Main {
     def run(config:Config) {
 
         // Start timer
-        val sw = new Stopwatch()
-        sw.start
+        val stopwatch = new Stopwatch()
 
         // Read queries and binary relevance truth values
         val queries:List[Query] = QueryReader.read(config.topicsFile)
         RelevanceReader.read(config.qrelsFile, queries)
 
         // Collect statistics about the document collection
+        // If possible, obtain the cached copy so we don't have to compute it again on each run
         println("Computing document collection statistics")
         var cs:CollectionStatistics = null
         if (new File("dataset/stat.cache").exists) {
@@ -77,7 +77,7 @@ object Main {
             writeCollectionStatisticsCache(cs, "dataset/stat.cache")
         }
         
-        // Set up the relevance model to use
+        // Set up the relevance model to use, either TfidfModel or LanguageModel
         var model:RelevanceModel = null
         if(config.model == "tfidf") {
             println("Using tfidf model")
@@ -87,12 +87,13 @@ object Main {
             model = new LanguageModel(cs)
         }
 
-        // Search for the queries
+        // Create the search engine with the chosen relevance model and run the search
+        // This will take a long time
         println("Running search")
         val searchEngine:SearchEngine = new SearchEngine(model)
         searchEngine.search(queries, documentIterator(config.tipsterDirectory), config.n)
 
-        // Set up ranking output file
+        // After search is complete, open the output file for the rankings
         var outputFile:File = null
         if(config.model == "tfidf") {
             outputFile = new File("ranking-t-rolf-jagerman.run")
@@ -101,7 +102,8 @@ object Main {
         }
         val output = new PrintWriter(outputFile)
 
-        // Perform and display metrics while writing results to file
+        // Compute performance with various metrics per query
+        // This also writes the ranked results to a file
         var MAP:Double = 0.0
         for( query <- queries ) {
             val pr = new PrecisionRecall(query)
@@ -117,12 +119,16 @@ object Main {
                 output.println(query.id + " " + count + " " + r.id.replaceAll("[^a-zA-Z0-9]+", ""))
             }
         }
+        output.flush()
+        output.close()
+
+        // Compute and display the global metric (MAP)
         MAP /= queries.size.toDouble
         println("MAP: %.3f".format(MAP))
 
-        // Print the time spent
+        // Print the total time spent
         print("Total time: ")
-        sw.printTime
+        println(stopwatch)
 
     }
 

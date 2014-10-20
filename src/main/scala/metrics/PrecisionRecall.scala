@@ -7,6 +7,9 @@ import ch.ethz.inf.da.tipstersearch.Query
   * 
   * The query contains the result set and the known binary relevance ground truth
   * which it uses to compute various IR retrieval metrics such as precision and recall
+  * 
+  * @constructor creates a precision recall metric based on given query data
+  * @param the query
   */
 class PrecisionRecall(query:Query) {
 

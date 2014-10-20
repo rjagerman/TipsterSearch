@@ -4,8 +4,10 @@ import scala.collection.mutable.HashMap
 import ch.ethz.inf.da.tipstersearch.scoring.{TopResults, Result, RelevanceModel}
 import ch.ethz.inf.da.tipstersearch.util.Stopwatch
 
-/** Creates a new search engine that uses given Relevance Model
+/** 
+  * A search engine that uses a Relevance Model to rank documents
   *
+  * @constructor creates a search engine that uses given relevance model
   * @param model the relevance model to use
   */
 class SearchEngine(model:RelevanceModel) {
@@ -23,10 +25,12 @@ class SearchEngine(model:RelevanceModel) {
             query.results = new TopResults(n)
         }
 
-        // For each document process it and evaluate it with the queries
+        // For each document: score it per query and add it to each query's results
         var iter = 0
         var lastCount = 0
-        val sw = new Stopwatch()
+        val updateFrequency = 1000 // Update progress every this many milliseconds
+        val localStopwatch = new Stopwatch()
+        val globalStopwatch = new Stopwatch()
         for (document <- documents) {
 
             queries.par.foreach{
@@ -34,16 +38,17 @@ class SearchEngine(model:RelevanceModel) {
             }
 
             iter += 1
-            if (sw.seconds >= 1) {
-                print("\rSearched " + iter + " documents (" + (iter - lastCount) + "/s)  ")
+            if (localStopwatch.milliseconds >= updateFrequency) {
+                print("\033[2K") // Clear line
+                print("\rSearched " + iter + " documents (" + (iter/(globalStopwatch.seconds+1)) + "/s) (" + globalStopwatch + ")")
                 lastCount = iter
-                sw.start
+                localStopwatch.start
             }
             
         }
 
-        println()
-        println("Done processing " + iter + " documents")
+        print("\033[2K") // Clear line
+        println("\rDone searching " + iter + " documents in " + globalStopwatch)
 
     }
 }

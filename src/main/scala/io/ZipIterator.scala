@@ -3,7 +3,8 @@ package ch.ethz.inf.da.tipstersearch.io
 import java.util.zip.{ZipEntry, ZipInputStream}
 import java.io.{ByteArrayInputStream, InputStream}
 
-/** This is an iterator that handles zip files and recursively traverses embedded zip files.
+/**
+  * This is an iterator that handles zip files and recursively traverses embedded zip files.
   * It returns (filename:String, filecontents:InputStream) for every non zip file it finds
   * inside the zip provided by the InputStream
   * 

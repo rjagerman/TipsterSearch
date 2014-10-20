@@ -17,7 +17,7 @@ class TfidfModel(cs:CollectionStatistics) extends RelevanceModel {
     }
 
     def idf(t:String) : Double = {
-    	log2(cs.nrOfDocuments / (1.0 + cs.getDocumentFrequency(t)))
+        log2(cs.nrOfDocuments / (1.0 + cs.getDocumentFrequency(t)))
     }
 
 }

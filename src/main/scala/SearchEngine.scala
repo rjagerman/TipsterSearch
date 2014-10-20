@@ -9,15 +9,15 @@ import ch.ethz.inf.da.tipstersearch.scoring.{TopResults, Result, RelevanceModel}
   */
 class SearchEngine(model:RelevanceModel) {
 
-	/** Searches given queries on given documents and returns the top n results
-	  *
-	  * @param queries the queries to search on
-	  * @param documents the documents to search in
-	  * @param n the amount of results to retain
-	  */
-	def search(queries:List[Query], documents:Iterator[Document], n:Int) {
+    /** Searches given queries on given documents and returns the top n results
+      *
+      * @param queries the queries to search on
+      * @param documents the documents to search in
+      * @param n the amount of results to retain
+      */
+    def search(queries:List[Query], documents:Iterator[Document], n:Int) {
 
-		// Prepare a container for each query to store the results in
+        // Prepare a container for each query to store the results in
         for( query <- queries ) {
             query.results = new TopResults(n)
         }
@@ -37,5 +37,5 @@ class SearchEngine(model:RelevanceModel) {
             
         }
 
-	}
+    }
 }

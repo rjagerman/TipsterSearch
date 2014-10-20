@@ -14,7 +14,7 @@ object QueryReader {
             map(line => line.replaceAll("<title>\\s*Topic:\\s*(.*)\\s*$", "$1"))
 
         return nums.zip(topics).map{
-        	case(num:Int, topic:String) => new Query(num, topic)
+            case(num:Int, topic:String) => new Query(num, topic)
         }.toList
     }
 }

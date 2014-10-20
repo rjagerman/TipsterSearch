@@ -19,7 +19,7 @@ class CollectionStatistics {
     var nrOfDocuments:Int = 0
     var uniqueTerms:Int = 0
 
-	def compute(documents:Iterator[Document]) {
+    def compute(documents:Iterator[Document]) {
 
         nrOfDocuments = 0
         for(doc <- documents) {
@@ -38,11 +38,11 @@ class CollectionStatistics {
             }
         }
 
-	}
+    }
 
     def getDocumentFrequency(str:String) : Int = documentFrequencies(index(str))
     def getCollectionFrequency(str:String) : Int = collectionFrequencies(index(str))
     def index(str:String) : Int = (scala.util.hashing.MurmurHash3.stringHash(str)) >>> (32-size)
-	
+    
 }
 

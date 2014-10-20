@@ -1,5 +1,8 @@
 package ch.ethz.inf.da.tipstersearch.processing
 
+/**
+  * Defines a set of stopwords used for filtering
+  */
 object Stopwords {
     val set = Set(
         "a",

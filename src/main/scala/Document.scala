@@ -11,8 +11,8 @@ import ch.ethz.inf.da.tipstersearch.processing.TextProcessor
   */
 class Document(is:InputStream) {
 
-    val xml:XMLDocument = TipsterDocument.documentBuilder.parse(is)
-    val name:String = read(xml.getElementsByTagName("DOCNO")).replaceAll("[ \\t\\n]*", "")
+    val xml:XMLDocument = Document.documentBuilder.parse(is)
+    val name:String = read(xml.getElementsByTagName("DOCNO")).replaceAll("[ \\t\\n]+", "")
     val title:String = read(xml.getElementsByTagName("HEAD"))
     val text:String = read(xml.getElementsByTagName("TEXT")).replaceAll("[ \\t\\n]+", " ")
     val titleTokens:List[String] = TextProcessor.process(title)
@@ -31,6 +31,6 @@ class Document(is:InputStream) {
 
 }
 
-object TipsterDocument {
+object Document {
     val documentBuilder  = DocumentBuilderFactory.newInstance().newDocumentBuilder()
 }

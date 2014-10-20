@@ -2,6 +2,12 @@ package ch.ethz.inf.da.tipstersearch.metrics
 
 import ch.ethz.inf.da.tipstersearch.Query
 
+/**
+  * Computes basic IR retrieval metrics about a given query
+  * 
+  * The query contains the result set and the known binary relevance ground truth
+  * which it uses to compute various IR retrieval metrics such as precision and recall
+  */
 class PrecisionRecall(query:Query) {
 
     val retrievedDocuments:Set[String] = query.results.ordered.map(r => r.id).toSet

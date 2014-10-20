@@ -10,10 +10,10 @@ import scala.collection.immutable.TreeMap
   */
 class CollectionStatistics {
 
-    private val size:Int = 26
+    var size:Int = 25
 
-    private val documentFrequencies:Array[Int] = new Array[Int](1 << size)
-    private val collectionFrequencies:Array[Int] = new Array[Int](1 << size)
+    var documentFrequencies:Array[Int] = new Array[Int](1 << size)
+    var collectionFrequencies:Array[Int] = new Array[Int](1 << size)
 
     var maxDocLength:Int = 1
     var nrOfDocuments:Int = 0

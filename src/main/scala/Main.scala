@@ -1,6 +1,8 @@
 package ch.ethz.inf.da.tipstersearch
 
-import java.io.{File, FileInputStream, InputStream}
+import scala.pickling._
+import binary._
+import java.io.{File, BufferedInputStream, FileInputStream, FileOutputStream, InputStream}
 import scala.collection.mutable.HashMap
 import ch.ethz.inf.da.tipstersearch.io.{QueryReader, RelevanceReader, ZipIterator}
 import ch.ethz.inf.da.tipstersearch.scoring.{RelevanceModel, TfidfModel, LanguageModel}
@@ -52,9 +54,16 @@ object Main {
 
         // Collect statistics about the document collection
         println("Computing document collection statistics")
-        val cs:CollectionStatistics = new CollectionStatistics()
-        cs.compute(documentIterator(config.tipsterDirectory))
-
+        var cs:CollectionStatistics = null
+        if (new File("dataset/collectionstatistics").exists) {
+            println("Retrieving cached copy")
+            cs = readCollectionStatisticsCache("dataset/collectionstatistics")
+        } else {
+            cs = new CollectionStatistics()
+            cs.compute(documentIterator(config.tipsterDirectory))
+            writeCollectionStatisticsCache(cs, "dataset/collectionstatistics")
+        }
+        
         // Set up the relevance model to use
         val model:RelevanceModel = new TfidfModel(cs)
 
@@ -101,6 +110,30 @@ object Main {
                     case (name:String, is:InputStream) => new Document(is)
                 }
             )
+    }
+
+    /**
+      * Write the collection statistics to a cache file for future use
+      * 
+      * @param cs the collection statistics
+      * @param file the file to store it in
+      */
+    def writeCollectionStatisticsCache(cs:CollectionStatistics, file:String) {
+        val fos:FileOutputStream = new FileOutputStream(file)
+        fos.write(cs.pickle.value)
+        fos.close()
+    }
+
+    /**
+      * Reads the collection statistics from given cache file
+      * 
+      * @param file the file to read from
+      * @return the collection statistics
+      */
+    def readCollectionStatisticsCache(file:String) : CollectionStatistics = {
+        val fis:BufferedInputStream = new BufferedInputStream(new FileInputStream(file))
+        val input:BinaryPickleStream = BinaryPickleStream(fis)
+        input.unpickle[CollectionStatistics]
     }
 
 }

@@ -1,6 +1,6 @@
 package ch.ethz.inf.da.tipstersearch.util
 
-object Stopwatch {
+class Stopwatch {
     private var startTime:Long = 0
     private var endTime:Long = 0
     def start = { startTime = System.nanoTime }
@@ -8,7 +8,7 @@ object Stopwatch {
     def hours = minutes/60
     def minutes = seconds/60
     def seconds = milliseconds/1000
-    def milliseconds = (endTime-startTime)/1000000
+    def milliseconds = (System.nanoTime-startTime)/1000000
     def printTime = {
         stop
         if(hours >= 1) {

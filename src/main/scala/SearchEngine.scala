@@ -2,6 +2,7 @@ package ch.ethz.inf.da.tipstersearch
 
 import scala.collection.mutable.HashMap
 import ch.ethz.inf.da.tipstersearch.scoring.{TopResults, Result, RelevanceModel}
+import ch.ethz.inf.da.tipstersearch.util.Stopwatch
 
 /** Creates a new search engine that uses given Relevance Model
   *
@@ -24,6 +25,8 @@ class SearchEngine(model:RelevanceModel) {
 
         // For each document process it and evaluate it with the queries
         var iter = 0
+        var lastCount = 0
+        val sw = new Stopwatch()
         for (document <- documents) {
 
             queries.par.foreach{
@@ -31,8 +34,10 @@ class SearchEngine(model:RelevanceModel) {
             }
 
             iter += 1
-            if (iter % 10000 == 0) {
-                println("Searched " + iter + " documents")
+            if (sw.seconds >= 1) {
+                print("\rSearched " + iter + " documents (" + (iter - lastCount) + "/s)  ")
+                lastCount = iter
+                sw.start
             }
             
         }

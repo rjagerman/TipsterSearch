@@ -46,7 +46,8 @@ object Main {
     def run(config:Config) {
 
         // Start timer
-        Stopwatch.start
+        val sw = new Stopwatch()
+        sw.start
 
         // Read queries and binary relevance truth values
         val queries:List[Query] = QueryReader.read(config.topicsFile)
@@ -55,13 +56,13 @@ object Main {
         // Collect statistics about the document collection
         println("Computing document collection statistics")
         var cs:CollectionStatistics = null
-        if (new File("dataset/collectionstatistics").exists) {
+        if (new File("dataset/stat.cache").exists) {
             println("Retrieving cached copy")
-            cs = readCollectionStatisticsCache("dataset/collectionstatistics")
+            cs = readCollectionStatisticsCache("dataset/stat.cache")
         } else {
             cs = new CollectionStatistics()
             cs.compute(documentIterator(config.tipsterDirectory))
-            writeCollectionStatisticsCache(cs, "dataset/collectionstatistics")
+            writeCollectionStatisticsCache(cs, "dataset/stat.cache")
         }
         
         // Set up the relevance model to use
@@ -93,7 +94,7 @@ object Main {
 
         // Print the time spent
         print("Total time: ")
-        Stopwatch.printTime
+        sw.printTime
 
     }
 

@@ -11,7 +11,7 @@ object Tokenizer {
       */
     def tokenize(text:String) : List[String] = {
         text.split("[ \\_;:\\(\\),\\.\\-]+")
-            .map(s => s.replaceAll("[^a-zA-Z0-9]*", ""))
+            .map(s => s.replaceAll("[^a-zA-Z0-9]+", ""))
             .toList
     }
 

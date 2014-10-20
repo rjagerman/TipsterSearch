@@ -1,6 +1,7 @@
 package ch.ethz.inf.da.tipstersearch
 
 import scala.collection.immutable.TreeMap
+import ch.ethz.inf.da.tipstersearch.util.Stopwatch
 
 /** Stores statistics about the complete document collection such as document frequencies,
   * longest document length, etc.
@@ -16,15 +17,23 @@ class CollectionStatistics {
     var collectionFrequencies:Array[Int] = new Array[Int](1 << size)
 
     var maxDocLength:Int = 1
+    var collectionLength:Int = 0
     var nrOfDocuments:Int = 0
     var uniqueTerms:Int = 0
 
     def compute(documents:Iterator[Document]) {
 
         nrOfDocuments = 0
+        collectionLength = 0
+
+        var lastCount = 0
+        val sw = new Stopwatch()
+        sw.start
+
         for(doc <- documents) {
             nrOfDocuments += 1
             maxDocLength = scala.math.max(maxDocLength, doc.tokens.length)
+            collectionLength += doc.tokens.length
             doc.tokens.groupBy(identity).mapValues(l => l.length).foreach {
                 case (str,count) =>
                     val i:Int = index(str)
@@ -33,8 +42,11 @@ class CollectionStatistics {
                     documentFrequencies(i) = documentFrequencies(i) + 1
                     collectionFrequencies(i) = collectionFrequencies(i) + count
             }
-            if(nrOfDocuments % 10000 == 0) {
-                println("Processed " + nrOfDocuments + " documents (" + uniqueTerms + " unique terms)")
+
+            if(sw.seconds >= 1) {
+                sw.start
+                print("\rProcessed " + nrOfDocuments + " documents containing " + uniqueTerms + " unique terms (" + (nrOfDocuments - lastCount) + "/s)  ")
+                lastCount = nrOfDocuments
             }
         }
 

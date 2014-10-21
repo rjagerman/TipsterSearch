@@ -1,6 +1,5 @@
 package ch.ethz.inf.da.tipstersearch
 
-import scala.collection.mutable.HashMap
 import ch.ethz.inf.da.tipstersearch.scoring.{TopResults, Result, RelevanceModel}
 import ch.ethz.inf.da.tipstersearch.util.{Stopwatch, LinePrinter}
 

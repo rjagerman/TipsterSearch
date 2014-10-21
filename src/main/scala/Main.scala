@@ -1,12 +1,8 @@
 package ch.ethz.inf.da.tipstersearch
 
-import scala.pickling._
-import binary._
-import java.io.{PrintWriter, File, BufferedInputStream, FileInputStream, FileOutputStream, InputStream}
-import scala.collection.mutable.HashMap
+import java.io.{File, FileInputStream, InputStream, PrintWriter}
 import ch.ethz.inf.da.tipstersearch.io.{QueryReader, RelevanceReader, ZipIterator}
 import ch.ethz.inf.da.tipstersearch.scoring.{RelevanceModel, TfidfModel, LanguageModel}
-import ch.ethz.inf.da.tipstersearch.processing.Tokenizer
 import ch.ethz.inf.da.tipstersearch.util.Stopwatch
 import ch.ethz.inf.da.tipstersearch.metrics.PrecisionRecall
 

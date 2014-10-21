@@ -3,12 +3,12 @@ package ch.ethz.inf.da.tipstersearch.processing
 import com.github.aztek.porterstemmer.PorterStemmer
 
 /**
-  * Processes text strings and returns lists of cleaned up and processed tokens
+  * Processes text strings to generate lists of cleaned up tokens
   */
 object TextProcessor {
 
     /**
-      * Processes given string by tokenizing, removing stopwords and stemming
+      * Processes given string by tokenizing, removing stopwords, stemming and more
       * 
       * @param text the text to process
       * @return the processed tokens as a list of strings

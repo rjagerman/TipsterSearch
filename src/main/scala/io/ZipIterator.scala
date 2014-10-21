@@ -56,9 +56,11 @@ class ZipIterator(is:InputStream) extends Iterator[(String, InputStream)] {
 
     }
 
-    /** Generates a byte stream for the current entry in the given ZipInputStream
+    /** Generates a byte stream for the current entry in the given ZipInputStream.
       * This is necessary because closing ZipInputStreams is not wanted yet most
-      * parsers are not aware of this restriction and prematurely close the stream
+      * parsers are not aware of this restriction and prematurely close the stream.
+      * This method generates a stream of the content that can be closed without
+      * problems.
       * 
       * @param is The zip input stream to obtain the entry from
       * @param size The size of the entry

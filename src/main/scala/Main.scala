@@ -28,6 +28,7 @@ object Main {
 
     /**
       * Entry point of the application
+      * This parses the command line options and executes the run method
       *
       * @param args The command line arguments
       */
@@ -44,9 +45,7 @@ object Main {
                 } text("The model to use, valid values: [language|tfidf] (default: 'tfidf')")
         }
 
-        parser.parse(args, Config()) map { config => 
-            run(config)
-        }
+        parser.parse(args, Config()) map (run)
 
     }
 
@@ -57,25 +56,17 @@ object Main {
       */
     def run(config:Config) {
 
-        // Start timer
+        // Start a timer, so we will know how much time has passed at the end
         val stopwatch = new Stopwatch()
 
-        // Read queries and binary relevance truth values
+        // Read queries and binary relevance truth values from files
         val queries:List[Query] = QueryReader.read(config.topicsFile)
         RelevanceReader.read(config.qrelsFile, queries)
 
         // Collect statistics about the document collection
-        // If possible, obtain the cached copy so we don't have to compute it again on each run
         println("Computing document collection statistics")
-        var cs:CollectionStatistics = null
-        if (new File("dataset/stat.cache").exists) {
-            println("Retrieving cached copy")
-            cs = readCollectionStatisticsCache("dataset/stat.cache")
-        } else {
-            cs = new CollectionStatistics()
-            cs.compute(documentIterator(config.tipsterDirectory))
-            writeCollectionStatisticsCache(cs, "dataset/stat.cache")
-        }
+        val cs:CollectionStatistics = new CollectionStatistics()
+        cs.compute(documentIterator(config.tipsterDirectory))
         
         // Set up the relevance model to use, either TfidfModel or LanguageModel
         var model:RelevanceModel = null
@@ -87,48 +78,21 @@ object Main {
             model = new LanguageModel(cs)
         }
 
-        // Create the search engine with the chosen relevance model and run the search
-        // This will take a long time
-        println("Running search")
+        // Create the search engine with the chosen relevance model
         val searchEngine:SearchEngine = new SearchEngine(model)
+
+        // Run the search, this will take a long time...
+        println("Running search")
         searchEngine.search(queries, documentIterator(config.tipsterDirectory), config.n)
 
-        // After search is complete, open the output file for the rankings
-        var outputFile:File = null
-        if(config.model == "tfidf") {
-            outputFile = new File("ranking-t-rolf-jagerman.run")
-        } else {
-            outputFile = new File("ranking-l-rolf-jagerman.run")
-        }
-        val output = new PrintWriter(outputFile)
+        // After the search is complete, open the output file for the rankings
+        writeResultsToFile(queries, config)
 
-        // Compute performance with various metrics per query
-        // This also writes the ranked results to a file
-        var MAP:Double = 0.0
-        for( query <- queries ) {
-            val pr = new PrecisionRecall(query)
-            MAP += pr.precision
-            println(query.id + " ('" + query + "')")
-            println("   Precision: %.3f".format(pr.precision))
-            println("   Recall: %.3f".format(pr.recall))
-            println("   Avg Precision: %.3f".format(pr.averagePrecision))
-            
-            var count = 0
-            for(r <- query.results.ordered) {
-                count += 1
-                output.println(query.id + " " + count + " " + r.id.replaceAll("[^a-zA-Z0-9]+", ""))
-            }
-        }
-        output.flush()
-        output.close()
+        // Display the search performance
+        displayPerformance(queries)
 
-        // Compute and display the global metric (MAP)
-        MAP /= queries.size.toDouble
-        println("MAP: %.3f".format(MAP))
-
-        // Print the total time spent
-        print("Total time: ")
-        println(stopwatch)
+        // Display the total time spent
+        println("Total time: " + stopwatch)
 
     }
 
@@ -149,27 +113,58 @@ object Main {
     }
 
     /**
-      * Write the collection statistics to a cache file for future use
+      * Writes the results of the search to an output file
       * 
-      * @param cs the collection statistics
-      * @param file the file to store it in
+      * @param queries the list of queries to write the results for
+      * @param config the config which contains the model which determines the filename
       */
-    def writeCollectionStatisticsCache(cs:CollectionStatistics, file:String) {
-        val fos:FileOutputStream = new FileOutputStream(file)
-        fos.write(cs.pickle.value)
-        fos.close()
+    def writeResultsToFile(queries:List[Query], config:Config) {
+
+        // Open a writer to an appropriate output file
+        var outputFile:File = null
+        if(config.model == "tfidf") {
+            outputFile = new File("ranking-t-rolf-jagerman.run")
+        } else {
+            outputFile = new File("ranking-l-rolf-jagerman.run")
+        }
+        val output = new PrintWriter(outputFile)
+
+        // Write results to file
+        for(query <- queries) {
+            var count = 0
+            for(result <- query.results.ordered) {
+                count += 1
+                output.println(query.id + " " + count + " " + result.id.replaceAll("[^a-zA-Z0-9]+", ""))
+            }
+        }
+
+        // Close output
+        output.flush()
+        output.close()
+
     }
 
     /**
-      * Reads the collection statistics from given cache file
-      * 
-      * @param file the file to read from
-      * @return the collection statistics
+      * Displays the search performance over the given list of queries
+      *
+      * @param queries the list of queries to perform metric over
       */
-    def readCollectionStatisticsCache(file:String) : CollectionStatistics = {
-        val fis:BufferedInputStream = new BufferedInputStream(new FileInputStream(file))
-        val input:BinaryPickleStream = BinaryPickleStream(fis)
-        input.unpickle[CollectionStatistics]
+    def displayPerformance(queries:List[Query]) {
+
+        var MAP:Double = 0.0
+        for( query <- queries ) {
+            val pr = new PrecisionRecall(query)
+            MAP += pr.precision
+            println(query.id + " ('" + query + "')")
+            println("   Precision: %.3f".format(pr.precision))
+            println("   Recall: %.3f".format(pr.recall))
+            println("   Avg Precision: %.3f".format(pr.averagePrecision))
+        }
+
+        // Compute and display the global metric (MAP)
+        MAP /= queries.size.toDouble
+        println("MAP: %.3f".format(MAP))
+
     }
 
 }

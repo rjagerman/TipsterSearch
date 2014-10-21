@@ -5,6 +5,7 @@ import ch.ethz.inf.da.tipstersearch.CollectionStatistics
 
 /**
   * A language model used for scoring documents based on a query
+  * This model uses jelinek-mercer smoothing
   * 
   * @constructor creates the language model for given collection statistics
   * @param cs the complete collection statistics
@@ -20,14 +21,14 @@ class LanguageModel(cs:CollectionStatistics) extends RelevanceModel {
       */
     override def score(queryTokens:List[String], documentTokens:List[String]) : Double = {
 
-        // Use the recommended lambda value of 0.1 for title queries as stated in the paper
+        // Use a standard lambda value of 0.1
         val lambda:Double = 0.1
 
         queryTokens.map(
                 w => log2(1.0 +
-                  ((1.0-lambda) * p(w, tf(documentTokens), documentTokens.length)) /
+                  ((1.0-lambda) * p(w, documentTokens)) /
                   (lambda * p(w)))
-            ).reduce(_*_)
+            ).product
 
     }
 
@@ -35,12 +36,11 @@ class LanguageModel(cs:CollectionStatistics) extends RelevanceModel {
       * Computes the probability of a word given a document
       * 
       * @param word the word
-      * @param termFrequencies the term frequencies of the document
-      * @param docLength the length of the document
+      * @param documentTokens the list of tokens in the document
       * @return the probability of given word in the document
       */
-    def p(word:String, termFrequencies:Map[String, Int], docLength:Int) : Double = {
-        termFrequencies.getOrElse[Int](word, 0).toDouble / (docLength.toDouble)
+    def p(word:String, documentTokens:List[String]) : Double = {
+        tf(documentTokens).getOrElse[Int](word, 0).toDouble / (documentTokens.length.toDouble)
     }
 
     /**

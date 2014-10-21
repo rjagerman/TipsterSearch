@@ -50,7 +50,7 @@ class LanguageModel(cs:CollectionStatistics) extends RelevanceModel {
       * @return the probability of given word based on the collection
       */
     def p(word:String) : Double = {
-        (cs.getCollectionFrequency(word).toDouble+1.0) / (cs.collectionLength.toDouble+1.0)
+        cs.getCollectionFrequency(word).toDouble / cs.collectionLength.toDouble
     }
 
 }

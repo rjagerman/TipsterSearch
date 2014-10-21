@@ -2,7 +2,7 @@ package ch.ethz.inf.da.tipstersearch
 
 import scala.collection.mutable.HashMap
 import ch.ethz.inf.da.tipstersearch.scoring.{TopResults, Result, RelevanceModel}
-import ch.ethz.inf.da.tipstersearch.util.Stopwatch
+import ch.ethz.inf.da.tipstersearch.util.{Stopwatch, LinePrinter}
 
 /** 
   * A search engine that uses a Relevance Model to rank documents
@@ -39,16 +39,14 @@ class SearchEngine(model:RelevanceModel) {
 
             iter += 1
             if (localStopwatch.milliseconds >= updateFrequency) {
-                print("\033[2K") // Clear line
-                print("\rSearched " + iter + " documents (" + (iter/(globalStopwatch.seconds+1)) + "/s) (" + globalStopwatch + ")")
+                LinePrinter.print("Searched " + iter + " documents (" + (iter/(globalStopwatch.seconds+1)) + "/s) (" + globalStopwatch + ")")
                 lastCount = iter
                 localStopwatch.start
             }
             
         }
 
-        print("\033[2K") // Clear line
-        println("\rDone searching " + iter + " documents in " + globalStopwatch)
+        LinePrinter.println("Done searching " + iter + " documents in " + globalStopwatch)
 
     }
 }

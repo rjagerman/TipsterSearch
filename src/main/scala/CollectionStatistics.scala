@@ -1,7 +1,7 @@
 package ch.ethz.inf.da.tipstersearch
 
 import scala.collection.immutable.TreeMap
-import ch.ethz.inf.da.tipstersearch.util.Stopwatch
+import ch.ethz.inf.da.tipstersearch.util.{Stopwatch, LinePrinter}
 
 /**
   * Stores statistics about the complete document collection such as document frequencies,
@@ -51,15 +51,13 @@ class CollectionStatistics {
             }
 
             if(localStopwatch.milliseconds >= updateFrequency) {
-                print("\033[2K") // Clear line
-                print("\rProcessed " + nrOfDocuments + " documents (" + (nrOfDocuments/(globalStopwatch.seconds+1)) + "/s) containing " + uniqueTerms + " unique terms (" + globalStopwatch + ")")
+                LinePrinter.print("Processed " + nrOfDocuments + " documents (" + (nrOfDocuments/(globalStopwatch.seconds+1)) + "/s) containing " + uniqueTerms + " unique terms (" + globalStopwatch + ")")
                 lastCount = nrOfDocuments
                 localStopwatch.start
             }
         }
 
-        print("\033[2K") // Clear line
-        println("\rDone processing " + nrOfDocuments + " documents in " + globalStopwatch)
+        LinePrinter.println("Done processing " + nrOfDocuments + " documents in " + globalStopwatch)
 
     }
 

@@ -41,7 +41,7 @@ object Main {
             opt[String]('q', "qrelsFile") action { (x, c) => c.copy(qrelsFile = x) } text("The qrels file (default: 'dataset/qrels')")
             opt[String]('m', "model") action { (x, c) => c.copy(model = x) } validate {
                     x => if(x == "tfidf" || x == "language") success else failure("Value <model> must be either 'tfidf' or 'language'")
-                } text("The model to use, valid values: [language|tfidf]")
+                } text("The model to use, valid values: [language|tfidf] (default: 'tfidf')")
         }
 
         parser.parse(args, Config()) map { config => 

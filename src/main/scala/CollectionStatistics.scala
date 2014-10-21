@@ -1,21 +1,16 @@
 package ch.ethz.inf.da.tipstersearch
 
-import scala.collection.immutable.TreeMap
+import scala.collection.mutable.{Map, HashMap}
 import ch.ethz.inf.da.tipstersearch.util.{Stopwatch, LinePrinter}
 
 /**
   * Stores statistics about the complete document collection such as document frequencies,
   * longest document length, etc.
-  * 
-  * Due to the size of the document collection, this uses feature hashing (Murmur3) for
-  * storage and lookup of words. It uses a large size (2^25) to prevent collisions.
   */
 class CollectionStatistics {
 
-    var size:Int = 25
-
-    var documentFrequencies:Array[Int] = new Array[Int](1 << size)
-    var collectionFrequencies:Array[Int] = new Array[Int](1 << size)
+    var documentFrequencies:Map[String, Int] = new HashMap[String, Int]()
+    var collectionFrequencies:Map[String, Int] = new HashMap[String, Int]()
 
     var maxDocLength:Int = 1
     var collectionLength:Int = 0
@@ -43,19 +38,18 @@ class CollectionStatistics {
             collectionLength += doc.tokens.length
             doc.tokens.groupBy(identity).mapValues(l => l.length).foreach {
                 case (str,count) =>
-                    val i:Int = index(str)
-                    if(documentFrequencies(i) == 0)
-                        uniqueTerms += 1
-                    documentFrequencies(i) = documentFrequencies(i) + 1
-                    collectionFrequencies(i) = collectionFrequencies(i) + count
+                    documentFrequencies.put(str, documentFrequencies.getOrElse(str,0) + 1)
+                    collectionFrequencies.put(str, collectionFrequencies.getOrElse(str,0) + count)
             }
 
             if(localStopwatch.milliseconds >= updateFrequency) {
-                LinePrinter.print("Processed " + nrOfDocuments + " documents (" + (nrOfDocuments/(globalStopwatch.seconds+1)) + "/s) containing " + uniqueTerms + " unique terms (" + globalStopwatch + ")")
+                LinePrinter.print("Processed " + nrOfDocuments + " documents (" + (nrOfDocuments/(globalStopwatch.seconds+1)) + "/s) containing " + documentFrequencies.size + " unique terms (" + globalStopwatch + ")")
                 lastCount = nrOfDocuments
                 localStopwatch.start
             }
         }
+
+        uniqueTerms = documentFrequencies.size
 
         LinePrinter.println("Done processing " + nrOfDocuments + " documents in " + globalStopwatch)
 
@@ -65,22 +59,13 @@ class CollectionStatistics {
       * @param str the word to obtain the document frequency for
       * @return the document frequency
       */
-    def getDocumentFrequency(str:String) : Int = documentFrequencies(index(str))
+    def getDocumentFrequency(str:String) : Int = documentFrequencies.getOrElse(str, 0)
 
     /**
       * @param str the word to obtain the collection frequency for
       * @return the collection frequency
       */
-    def getCollectionFrequency(str:String) : Int = collectionFrequencies(index(str))
-
-    /**
-      * Obtains the Murmur3 hashed index which is very fast and 
-      * has nice collision-prevention properties for short text
-      * 
-      * @param str the string to get the index for
-      * @return int the hashed integer index
-      */
-    private def index(str:String) : Int = (scala.util.hashing.MurmurHash3.stringHash(str)) >>> (32-size)
+    def getCollectionFrequency(str:String) : Int = collectionFrequencies.getOrElse(str, 0)
     
 }
 

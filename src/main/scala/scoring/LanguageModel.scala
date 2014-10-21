@@ -27,7 +27,8 @@ class LanguageModel(cs:CollectionStatistics) extends RelevanceModel {
         queryTokens.map(
                 w => log2(1.0 +
                   ((1.0-lambda) * p(w, documentTokens)) /
-                  (lambda * p(w)))
+                  (lambda * p(w))
+                )
             ).product
 
     }
@@ -40,7 +41,7 @@ class LanguageModel(cs:CollectionStatistics) extends RelevanceModel {
       * @return the probability of given word in the document
       */
     def p(word:String, documentTokens:List[String]) : Double = {
-        tf(documentTokens).getOrElse[Int](word, 0).toDouble / (documentTokens.length.toDouble)
+        tf(documentTokens).getOrElse[Int](word, 0).toDouble / documentTokens.length.toDouble
     }
 
     /**

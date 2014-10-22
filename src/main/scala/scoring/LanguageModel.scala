@@ -5,7 +5,7 @@ import ch.ethz.inf.da.tipstersearch.CollectionStatistics
 
 /**
   * A language model used for scoring documents based on a query
-  * This model uses jelinek-mercer smoothing
+  * This model uses jelinek-mercer smoothing with a fixed λ of 0.1
   * 
   * @constructor creates the language model for given collection statistics
   * @param cs the complete collection statistics
@@ -17,17 +17,18 @@ class LanguageModel(cs:CollectionStatistics) extends RelevanceModel {
       * 
       * @param queryTokens the list of tokens in the query
       * @param documentTokens the list of tokens in the document
-      * @return the jelinek mercer smoothed score
+      * @return the jelinek-mercer smoothed score
       */
     override def score(queryTokens:List[String], documentTokens:List[String]) : Double = {
 
-        // Use a standard lambda value of 0.1
-        val lambda:Double = 0.1
+        // Use a standard λ value of 0.1
+        val λ:Double = 0.1
 
+        // Compute p(q|d) = ∏ p(w|d)  with jelinek-mercer smoothing
         queryTokens.map(
                 w => log2(1.0 +
-                  ((1.0-lambda) * p(w, documentTokens)) /
-                  (lambda * p(w))
+                  ((1.0-λ) * p(w, documentTokens)) /
+                  (λ * p(w))
                 )
             ).product
 
@@ -41,7 +42,7 @@ class LanguageModel(cs:CollectionStatistics) extends RelevanceModel {
       * @return the probability of given word in the document
       */
     def p(word:String, documentTokens:List[String]) : Double = {
-        tf(documentTokens).getOrElse[Int](word, 0).toDouble / documentTokens.length.toDouble
+        documentTokens.filter(s => s == word).length.toDouble / documentTokens.length.toDouble
     }
 
     /**

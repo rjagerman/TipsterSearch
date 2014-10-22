@@ -22,7 +22,7 @@ class TfidfModel(cs:CollectionStatistics) extends RelevanceModel {
 
         // Compute log tf
         val docLength:Int = documentTokens.length
-        val logtf:Map[String, Double] = tf(documentTokens).map{
+        val logtf:Map[String, Double] = tf(documentTokens.filter(queryTokens.toSet)).map{
             case (k,0) => (k, 0.0) // 0 if tf = 0
             case (k,v) => (k, 1.0 + log2(v.toDouble)) // 1+log_2(tf) if tf > 0
         }

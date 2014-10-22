@@ -2,13 +2,25 @@
 
 This information retrieval system is part of the 2014 Information Retrieval course at ETH. It searches and ranks documents in the tipster dataset according to a set of queries. Additionally it performs several metrics on the found results and displays these at the end of the search.
 
-## Compilation
+## Search models
+
+This project uses two different search model. One term-based approach and one language-based approach. both will be shortly described here.
+
+### Term-based model
+The term-based model uses a logarithmically scaled TFIDF model. 
+
+### Language-based model
+The language-based model uses jelinek-mercer smoothing with a fixed λ of 0.1.
+
+## Instructions
+
+### Compilation
 
 This system is build using `sbt`. To compile, browse to the directory containing `build.sbt` and run:
 
     sbt compile
     
-## Running
+### Running
 
 To run the software:
 

@@ -24,13 +24,13 @@ class LanguageModel(cs:CollectionStatistics) extends RelevanceModel {
         // Use a standard λ value of 0.1
         val λ:Double = 0.1
 
-        // Compute p(q|d) = ∏ p(w|d)  with jelinek-mercer smoothing
+        // Compute the score
         queryTokens.map(
                 w => log2(1.0 +
                   ((1.0-λ) * p(w, documentTokens)) /
                   (λ * p(w))
                 )
-            ).product
+            ).sum
 
     }
 

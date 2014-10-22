@@ -18,7 +18,7 @@ Where
     tf(w) = the term frequency of a word in the document
 
 ### Language-based model
-The language-based model uses jelinek-mercer smoothing and is defined in the file `src/main/scala/scoring/LanguageModel.scala`. The score is computed by summing, for every word in the query, the log of the probability of the word given a document p(w|d) divided by the probability of the word over the entire collection p(w). This is smoothed by a value λ.:
+The language-based model uses Jelinek-Mercer smoothing and is defined in the file `src/main/scala/scoring/LanguageModel.scala`. The score is computed by summing, for every word in the query, the log of the probability of the word given a document p(w|d) divided by the probability of the word over the entire collection p(w):
 
           ∑                    (1.0-λ) * p(w|d))
       w∈query     log2( 1.0 + -----------------  )
@@ -33,9 +33,11 @@ Where
 
 ## Instructions
 
+The system is build using the Scala Build Tool (sbt) which can be found [here](http://www.scala-sbt.org/). Please make sure you have sbt installed and can execute `sbt` from the command line before continuing.
+
 ### Compilation
 
-This system is build using `sbt`. To compile, browse to the directory containing `build.sbt` and run:
+To compile, browse to the directory containing `build.sbt` and run:
 
     sbt compile
     
@@ -58,7 +60,7 @@ You can supply the following command line parameters:
     -m <value> | --model <value>
         The model to use, valid values: [language|tfidf] (default: 'tfidf')
 
-For example, to specify the directory where the tipster dataset can be found use the `-d` parameter:
+For example, to specify the directory where the tipster zip files can be found use the `-d` parameter:
 
     sbt "run -d /path/to/tipsterdataset/"
     

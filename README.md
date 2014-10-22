@@ -4,13 +4,32 @@ This information retrieval system is part of the 2014 Information Retrieval cour
 
 ## Search models
 
-This project uses two different search model. One term-based approach and one language-based approach. both will be shortly described here.
+This project uses two different search models. One term-based and one language-based.
 
 ### Term-based model
-The term-based model uses a logarithmically scaled TFIDF model. 
+The term-based model uses a logarithmically scaled TFIDF model and is defined in the file `src/main/scala/scoring/TfidfModel.scala`. The score is computed as the sum of the scores of the individial words in the query, which are logarithmically scaled:
+
+          ∑
+      w∈query     (1.0 + log2(tf(w)))
+    ∧ w∈document
+
+Where
+
+    tf(w) = the term frequency of a word in the document
 
 ### Language-based model
-The language-based model uses jelinek-mercer smoothing with a fixed λ of 0.1.
+The language-based model uses jelinek-mercer smoothing and is defined in the file `src/main/scala/scoring/LanguageModel.scala`. The score is computed by summing, for every word in the query, the log of the probability of the word given a document p(w|d) divided by the probability of the word over the entire collection p(w). This is smoothed by a value λ.:
+
+          ∑                    (1.0-λ) * p(w|d))
+      w∈query     log2( 1.0 + -----------------  )
+    ∧ w∈document                λ     * p(w)
+
+Where
+
+    p(w|d) = tf(w) / |d|
+    p(w) = cf(w) / |∑ cf(v)|
+    λ = 0.1
+    cf(w) = the collection frequency of a word
 
 ## Instructions
 

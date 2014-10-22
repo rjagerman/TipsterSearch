@@ -20,9 +20,9 @@ Where
 ### Language-based model
 The language-based model uses Jelinek-Mercer smoothing and is defined in the file `src/main/scala/scoring/LanguageModel.scala`. The score is computed by summing, for every word in the query, the log of the probability of the word given a document p(w|d) divided by the probability of the word over the entire collection p(w):
 
-          ∑                    (1.0-λ) * p(w|d))
-      w∈query     log2( 1.0 + -----------------  )
-    ∧ w∈document                λ     * p(w)
+          ∑                    (1.0-λ) * p(w|d)
+      w∈query     log2( 1.0 + ---------------- )
+    ∧ w∈document                 λ    * p(w)
 
 Where
 

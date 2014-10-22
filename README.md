@@ -64,7 +64,11 @@ For example, to specify the directory where the tipster zip files can be found u
 
     sbt "run -d /path/to/tipsterdataset/"
     
-An additional example specifying all the parameters:
+In order to specify which queries to execute, you have to create a `topics` file which contains them. This file should match the format of the sample `topics` file that is provided. Similarly, the truth values will have to be specified in a `qrels` file which should match the format of the `qrels` file that is provided. You can pass the location of both these files as parameters to the program:
 
-    sbt "run -n 50 -d /path/to/tipsterdataset/ -t /path/to/topics -q /path/to/qrels -m language"
+    sbt "run -d /path/to/tipsterdataset/ -t /path/to/topics -q /path/to/qrels"
+
+In order to use the language model instead of the (default) tfidf model, you can use the `-m` parameter:
     
+    sbt "run -d /path/to/tipsterdataset/ -t /path/to/topics -q /path/to/qrels -m language"
+

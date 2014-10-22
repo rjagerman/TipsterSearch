@@ -60,15 +60,12 @@ class PrecisionRecall(query:Query) {
       * @return the average precision
       */
     def averagePrecision : Double = {
-        var average:Double = 0.0
-        (1 to retrieved.size) foreach {
-            k => average += precision(k) * isRelevant(k)
+        if((retrieved & relevant).size == 0) {
+            0.0
+        } else {
+            val sumOfAvgPrec:Double = (1 to retrieved.size).map(k => precision(k)*isRelevant(k).toDouble).sum
+            sumOfAvgPrec / (retrieved & relevant).size.toDouble
         }
-        val nrOfRelevantDocuments = (retrieved & relevant).size
-
-        // Prevent division by 0 if none of the documents were relevant...
-        if(nrOfRelevantDocuments == 0) 0
-        else average / nrOfRelevantDocuments.toDouble
     }
 
 }

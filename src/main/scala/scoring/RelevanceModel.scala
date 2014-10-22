@@ -6,14 +6,14 @@ package ch.ethz.inf.da.tipstersearch.scoring
   */
 abstract class RelevanceModel {
 
-	/**
-	  * Override this function to compute the score of given document and given query
-	  * 
-	  * @param queryTokens the list of tokens in the query
-	  * @param documentTokens the list of tokens in the document
-	  * @return the document's score for this query
-	  */
-	def score(queryTokens:List[String], documentTokens:List[String]) : Double
+    /**
+      * Override this function to compute the score of given document and given query
+      * 
+      * @param queryTokens the list of tokens in the query
+      * @param documentTokens the list of tokens in the document
+      * @return the document's score for this query
+      */
+    def score(queryTokens:List[String], documentTokens:List[String]) : Double
 
     /**
       * Computes the log_2

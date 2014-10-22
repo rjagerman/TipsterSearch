@@ -8,13 +8,13 @@ import scala.io.Source
   */
 object RelevanceReader{
 
-	/**
-	  * Reads binary relevance truth values from given file and stores
-	  * them in their appropriate query objects
-	  * 
-	  * @param path the path of the file to read from
-	  * @param queries the list of queries to store the values in
-	  */
+    /**
+      * Reads binary relevance truth values from given file and stores
+      * them in their appropriate query objects
+      * 
+      * @param path the path of the file to read from
+      * @param queries the list of queries to store the values in
+      */
     def read(path:String, queries:List[Query]) {
         for(query <- queries) {
             query.truth = Source.fromFile(path).getLines
